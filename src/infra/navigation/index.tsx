@@ -1,13 +1,24 @@
-import { createBrowserRouter } from "react-router-dom";
+import { ActionFunction, LoaderFunction, RouteObject, createBrowserRouter } from "react-router-dom";
 import Protected from "./ProtectedRoute";
 
-const pages = import.meta.glob("../../features/**/*.tsx", { eager: true })
+type PageModule = {
+  default: React.ComponentType | null,
+  loader: LoaderFunction | undefined,
+  action: ActionFunction | undefined,
+  ErrorBoundary: React.ComponentType | null
+}
+
+const pages: Record<string, PageModule> = import.meta.glob("../../features/**/*.tsx", { eager: true })
 
 const unrestricted = [
   "/login"
 ]
 
-const routes = []
+type IncrementedRouteObject = {
+  Element: React.ComponentType | null
+} & RouteObject
+
+const routes: IncrementedRouteObject[] = []
 
 for (const path of Object.keys(pages)) {
   const filename = path.match(/\.\.\/\.\.\/features\/(.*)\.tsx$/)?.[1].toLowerCase()
@@ -27,11 +38,14 @@ for (const path of Object.keys(pages)) {
 }
 
 type ProtectedFactoryProps = {
-  Element: React.ComponentType,
-  path: string
+  Element: React.ComponentType | null,
+  path: string | undefined
 }
 const protectedFactory = ({ Element, path }: ProtectedFactoryProps): JSX.Element => {
-  if (unrestricted.includes(path)) {
+  if (Element == null) {
+    throw Error("Can't use a null component")
+  }
+  if (path != undefined && unrestricted.includes(path)) {
     return (<Element />)
   }
   else {
