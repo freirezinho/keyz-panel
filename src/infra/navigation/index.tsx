@@ -41,15 +41,18 @@ type ProtectedFactoryProps = {
   Element: React.ComponentType | null,
   path: string | undefined
 }
-const protectedFactory = ({ Element, path }: ProtectedFactoryProps): JSX.Element => {
-  if (Element == null) {
-    throw Error("Can't use a null component")
-  }
-  if (path != undefined && unrestricted.includes(path)) {
+const protectedFactory = ({ Element, path }: ProtectedFactoryProps): JSX.Element | null => {
+  if (Element != null && path != undefined && unrestricted.includes(path)) {
     return (<Element />)
   }
   else {
-    return (<Protected><Element /></Protected>)
+    return (
+      <Protected>
+        {
+          Element && <Element />
+        }
+      </Protected>
+    )
   }
 }
 
@@ -58,5 +61,8 @@ export const router = createBrowserRouter(
     ...rest,
     element: protectedFactory({ Element, path: rest.path }),
     ...(ErrorBoundary && { errorElement: <ErrorBoundary /> })
-  }))
+  })),
+  {
+    basename: import.meta.env.BASE_URL
+  }
 )
