@@ -1,7 +1,8 @@
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { createContext, useContext, useEffect, useReducer } from 'react'
+import { createContext, useContext, useEffect, useReducer, useState } from 'react'
 import { useNavigate } from "react-router-dom";
 import Auth from '../firebase/Auth';
+import { Icons } from '@/components/ui/icons';
 
 type ProtectedProps = {
   children: React.ReactNode | null
@@ -101,25 +102,37 @@ function useAuth() {
   }
 }
 
+export const LoadingBG = () => (
+  <div className='w-full h-screen flex flex-col items-center justify-center bg-surface1'>
+    <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+  </div>
+)
+
 const Protected = ({ children }: ProtectedProps) => {
+  const [isLoading, setLoading] = useState(true)
   const [state, dispatch] = useReducer(protectedReducer, initialState)
   const value = { state, dispatch }
   const navigate = useNavigate()
   useEffect(() => {
+    dispatch({ type: ProtectedAction.loading })
     onAuthStateChanged(Auth.shared.auth, (user) => {
       if (user) {
         user.getIdToken()
           .then((token) => {
             dispatch({ type: ProtectedAction.updateUser, data: { user: user, token } })
+            dispatch({ type: ProtectedAction.loading })
+            setLoading(false)
           })
       } else {
         navigate("/login")
+        dispatch({ type: ProtectedAction.loading })
+        setLoading(false)
       }
     })
   }, [navigate])
 
   return (
-    <ProtectedContext.Provider value={value}>{children}</ProtectedContext.Provider>
+    <ProtectedContext.Provider value={value}>{isLoading ? <LoadingBG /> : children}</ProtectedContext.Provider>
   )
 }
 

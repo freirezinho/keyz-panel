@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { onAuthStateChanged } from "firebase/auth"
 import Auth from '../../infra/firebase/Auth'
 import { useNavigate } from "react-router-dom"
-import { Icons } from "@/components/ui/icons"
+import { LoadingBG } from "@/infra/navigation/ProtectedRoute"
 
 export default function Login() {
   const navigate = useNavigate()
@@ -15,11 +15,13 @@ export default function Login() {
     onAuthStateChanged(Auth.shared.auth, (user) => {
       if (user) {
         navigate("/")
+        setLoading(false)
       } else {
         setLoading(false)
       }
     })
-  }, [navigate])
+    setLoading(false)
+  }, [navigate, isLoading])
 
   return (
     <>
@@ -40,7 +42,7 @@ export default function Login() {
         />
       </div> */}
       {isLoading ?
-        (<div className="relative bg-surface1 flex flex-col items-center justify-center h-screen w-full"><Icons.spinner className="mr-2 h-4 w-4 animate-spin" /></div>)
+        (<LoadingBG />)
         : (<div className="container relative bg-surface1 hidden h-[800px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
           <a
             href="/login"
