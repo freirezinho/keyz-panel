@@ -1,6 +1,11 @@
 import { createBrowserRouter } from "react-router-dom";
+import Protected from "./ProtectedRoute";
 
 const pages = import.meta.glob("../../features/**/*.tsx", { eager: true })
+
+const unrestricted = [
+  "/login"
+]
 
 const routes = []
 
@@ -21,10 +26,23 @@ for (const path of Object.keys(pages)) {
   })
 }
 
+type ProtectedFactoryProps = {
+  Element: React.ComponentType,
+  path: string
+}
+const protectedFactory = ({ Element, path }: ProtectedFactoryProps): JSX.Element => {
+  if (unrestricted.includes(path)) {
+    return (<Element />)
+  }
+  else {
+    return (<Protected><Element /></Protected>)
+  }
+}
+
 export const router = createBrowserRouter(
   routes.map(({ Element, ErrorBoundary, ...rest }) => ({
     ...rest,
-    element: <Element />,
+    element: protectedFactory({ Element, path: rest.path }),
     ...(ErrorBoundary && { errorElement: <ErrorBoundary /> })
   }))
 )

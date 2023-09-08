@@ -5,22 +5,22 @@ import { AuthForm } from "./components/AuthForm"
 export default function Login() {
   return (
     <>
-      <div className="md:hidden">
+      {/* <div className="md:hidden">
         <img
-          src="/examples/authentication-light.png"
+          src="https://images.unsplash.com/photo-1635602739175-bab409a6e94c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2952&q=80"
           width={1280}
           height={843}
           alt="Authentication"
           className="block dark:hidden"
         />
         <img
-          src="/examples/authentication-dark.png"
+          src="https://images.unsplash.com/photo-1635602739175-bab409a6e94c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2952&q=80"
           width={1280}
           height={843}
           alt="Authentication"
           className="hidden dark:block"
         />
-      </div>
+      </div> */}
       <div className="container relative bg-surface1 hidden h-[800px] flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
         <a
           href="/login"
@@ -49,14 +49,14 @@ export default function Login() {
             Keyz
           </div>
           <div className="relative z-20 mt-auto">
-            <blockquote className="space-y-2">
+            {/* <blockquote className="space-y-2">
               <p className="text-lg">
                 &ldquo;This library has saved me countless hours of work and
                 helped me deliver stunning designs to my clients faster than
                 ever before.&rdquo;
               </p>
               <footer className="text-sm">Sofia Davis</footer>
-            </blockquote>
+            </blockquote> */}
           </div>
         </div>
         <div className="lg:p-8">
