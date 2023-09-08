@@ -1,5 +1,5 @@
 import { ActionFunction, LoaderFunction, RouteObject, createBrowserRouter } from "react-router-dom";
-import Protected from "./ProtectedRoute";
+import { Protected } from "./ProtectedRoute";
 
 type PageModule = {
   default: React.ComponentType | null,

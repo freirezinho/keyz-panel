@@ -3,20 +3,29 @@ import { Icons } from "@/components/ui/icons"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useState } from "react"
+import { useAuth } from "@/infra/navigation/ProtectedRoute"
+import { useNavigate } from "react-router-dom"
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function AuthForm({ className, ...props }: UserAuthFormProps) {
-  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const { isLoading, login } = useAuth()
+  const navigate = useNavigate()
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
-    setIsLoading(true)
+  }
 
-    setTimeout(() => {
-      setIsLoading(false)
-    }, 3000)
+  async function loginWithGoogle(event: React.SyntheticEvent) {
+    event.preventDefault()
+    login()
+      .then(() => {
+        navigate('/')
+      })
+      .catch((error) => {
+        // noop
+        console.error(error)
+      })
   }
 
   return (
@@ -55,7 +64,7 @@ export function AuthForm({ className, ...props }: UserAuthFormProps) {
           </span>
         </div>
       </div>
-      <Button variant="outline" type="button" disabled={isLoading}>
+      <Button variant="outline" type="button" disabled={isLoading} onClick={loginWithGoogle}>
         {isLoading ? (
           <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
         ) : (
