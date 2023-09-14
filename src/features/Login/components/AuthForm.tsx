@@ -5,27 +5,59 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/infra/navigation/ProtectedRoute"
 import { useNavigate } from "react-router-dom"
+import { useState } from "react"
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> { }
 
 export function AuthForm({ className, ...props }: UserAuthFormProps) {
-  const { isLoading, login } = useAuth()
+  const { isLoading, loginWithPassword, isError, authError } = useAuth()
+  const [username, setUsername] = useState("")
+  const [password, setPassword] = useState("")
   const navigate = useNavigate()
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
   }
 
-  async function loginWithGoogle(event: React.SyntheticEvent) {
+  // async function loginWithGoogle(event: React.SyntheticEvent) {
+  //   event.preventDefault()
+  //   login()
+  //     .then(() => {
+  //       navigate('/')
+  //     })
+  //     .catch((error) => {
+  //       // noop
+  //       console.error(error)
+  //     })
+  // }
+
+  async function loginWithEmailAndPassword(event: React.SyntheticEvent) {
     event.preventDefault()
-    login()
+    console.log(username)
+    console.log(password)
+    loginWithPassword(username, password)
       .then(() => {
-        navigate('/')
+        navigate("/")
       })
       .catch((error) => {
         // noop
         console.error(error)
       })
+      .finally(() => {
+        if (isError) {
+          console.error(authError)
+        }
+      })
+  }
+
+  function handleUserNameChange(event: React.SyntheticEvent) {
+    const { target } = event
+    setUsername((target as HTMLInputElement).value)
+  }
+
+  function handlePasswordChange(event: React.SyntheticEvent) {
+    const { target } = event
+    setPassword((target as HTMLInputElement).value)
   }
 
   return (
@@ -44,9 +76,24 @@ export function AuthForm({ className, ...props }: UserAuthFormProps) {
               autoComplete="email"
               autoCorrect="off"
               disabled={isLoading}
+              value={username}
+              onChange={handleUserNameChange}
+            />
+            <Label className="sr-only" htmlFor="email">
+              Password
+            </Label>
+            <Input
+              id="password"
+              placeholder="************"
+              type="password"
+              autoCapitalize="none"
+              autoCorrect="off"
+              disabled={isLoading}
+              value={password}
+              onChange={handlePasswordChange}
             />
           </div>
-          <Button disabled={isLoading}>
+          <Button disabled={isLoading} onClick={loginWithEmailAndPassword}>
             {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             )}
@@ -54,24 +101,6 @@ export function AuthForm({ className, ...props }: UserAuthFormProps) {
           </Button>
         </div>
       </form>
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-surface1 px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
-      </div>
-      <Button variant="outline" type="button" disabled={isLoading} onClick={loginWithGoogle}>
-        {isLoading ? (
-          <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <Icons.google className="mr-2 h-4 w-4" />
-        )}{" "}
-        Google
-      </Button>
     </div>
   )
 }

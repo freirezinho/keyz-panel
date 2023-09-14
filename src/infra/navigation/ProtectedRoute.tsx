@@ -89,6 +89,22 @@ function useAuth() {
     })
   }
 
+  const loginWithPassword = async (email: string, password: string) => {
+    context.dispatch({ type: ProtectedAction.loading })
+    Auth.shared.signInWithEmailAndPassword(email, password, (success: AuthData | null, error: AuthError | null) => {
+      if (error === null && success !== null) {
+        context.dispatch({ type: ProtectedAction.login, data: success })
+        context.dispatch({ type: ProtectedAction.loading })
+      } else if (error !== null) {
+        context.dispatch({ type: ProtectedAction.error, error })
+        context.dispatch({ type: ProtectedAction.loading })
+      } else {
+        context.dispatch({ type: ProtectedAction.loading })
+        throw new Error("Auth unhandled error")
+      }
+    })
+  }
+
   const logout = async () => {
     context.dispatch({ type: ProtectedAction.loading })
     context.dispatch({ type: ProtectedAction.logout })
@@ -97,8 +113,11 @@ function useAuth() {
 
   return {
     login,
+    loginWithPassword,
     logout,
-    isLoading: context.state.isLoading
+    isLoading: context.state.isLoading,
+    isError: context.state.isError,
+    authError: context.state.error
   }
 }
 

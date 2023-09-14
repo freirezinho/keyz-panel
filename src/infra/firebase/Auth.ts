@@ -1,5 +1,5 @@
-import { Auth, GoogleAuthProvider, signInWithPopup } from "firebase/auth"
-import { getAuth, AuthError as FireAuthError } from "firebase/auth"
+import { Auth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth"
+import { getAuth, AuthError as FireAuthError, signOut } from "firebase/auth"
 import { AuthData, AuthError } from "../navigation/ProtectedRoute"
 import initFirebase from "."
 import { FirebaseError } from "firebase/app"
@@ -25,6 +25,19 @@ class FirebaseAuthenticator {
     })
   }
 
+  signInWithEmailAndPassword = async (email: string, password: string, completion: (success: AuthData | null, error: AuthError | null) => void) => {
+    signInWithEmailAndPassword(this.auth, email, password)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        completion(({ user, token: "" }), (null))
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        completion((null), ({ errorCode, errorMessage, email }))
+      });
+  }
+
   signInWithGoogle = async (onSuccess: (data: AuthData) => void, onError: (error: AuthError) => void) => {
     try {
       const result = await signInWithPopup(this.auth, this.googleProvider)
@@ -40,6 +53,16 @@ class FirebaseAuthenticator {
       const credential = GoogleAuthProvider.credentialFromError(error as FirebaseError)
       console.error(JSON.stringify({ errorCode, errorMessage, email, credential }))
       onError({ errorCode, errorMessage, email })
+    }
+  }
+
+  signOut = async () => {
+    try {
+      await signOut(this.auth)
+      return true
+    } catch (error) {
+      console.error(error)
+      return false
     }
   }
 }
