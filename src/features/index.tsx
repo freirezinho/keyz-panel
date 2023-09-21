@@ -7,13 +7,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Log, columns } from "./components/table/columns"
+import { Log, LogResponse, columns } from "./components/table/columns"
 import { DataTable } from "./components/table/DataTable"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { useCallback, useEffect, useState } from "react"
 import { Icons } from "@/components/ui/icons"
 import { useToast } from "@/components/ui/use-toast"
+
+type CreateKeyResponse = {
+  id: string,
+  value: string
+}
 
 function Home() {
 
@@ -27,8 +32,8 @@ function Home() {
   const getData = async (): Promise<Log[]> => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/v1/logs/`)
-      const json = await res.json() as Log[]
-      return json
+      const json = await res.json() as LogResponse
+      return json.result
     } catch (error) {
       console.error(error)
       return []
@@ -45,32 +50,46 @@ function Home() {
     setKeyID((target as HTMLInputElement).value)
   }, [])
 
-  const createKey = useCallback(async (userID: string) => {
-    fetch(`${import.meta.env.VITE_API_URL}/v1/keys`, {
+  const createKey = useCallback(async (userID: string): Promise<CreateKeyResponse | null> => {
+    return fetch(`${import.meta.env.VITE_API_URL}/v1/keys`, {
       body: JSON.stringify({
         user_id: userID
       }), method: 'post', headers: { 'content-type': 'application/json' }
-    }).then(() => {
-
+    }).then((res: Response) => {
+      if (res.status !== 201 && res.status !== 200) {
+        throw Error("http error")
+      }
+      return res.json()
     }).catch(error => {
       console.error(error)
+      return null
     })
   }, [])
 
-  const cancelKey = useCallback(async (keyID: string) => {
-    fetch(`${import.meta.env.VITE_API_URL}/v1/keys/${keyID}`, { method: 'delete' })
+  const cancelKey = useCallback(async (keyID: string): Promise<boolean> => {
+    return fetch(`${import.meta.env.VITE_API_URL}/v1/keys/${keyID}`, { method: 'delete' })
+    .then((res: Response) => {
+      if (res.status !== 201 && res.status !== 200) {
+        throw Error("http error")
+      }
+      return true
+    })
+    .catch(error => {
+      console.error(error)
+      return false
+    })
   }, [])
 
   const createKeyForUser = useCallback((event: React.SyntheticEvent) => {
     event.preventDefault()
     setCreatingKey(true)
     createKey(userId)
-      .then((res: any) => {
-        if (res.statusCode !== 201 || res.statusCode !== 200) {
-          throw Error("http error")
+      .then((res: CreateKeyResponse | null) => {
+        if (res === null) {
+          throw new Error("null answer")
         }
         toast({
-          title: "Chave criada",
+          title: `Chave ${res?.id} criada com sucesso`,
           description: `O usuário ${userId} já pode utilizá-la`,
         })
       })
@@ -91,10 +110,10 @@ function Home() {
     event.preventDefault()
     setDeletingKey(true)
     cancelKey(keyID)
-      .then((res: any) => {
-        if (res.statusCode !== 201 || res.statusCode !== 200) {
-          throw Error("http error")
-        }
+      .then((res: boolean) => {
+        if (!res) {
+          throw new Error("failed to cancel key")
+        } 
         toast({
           title: "Chave cancelada",
           description: `A chave ${keyID} não pode mais ser utilizada`
@@ -111,7 +130,7 @@ function Home() {
         setDeletingKey(false)
         setKeyID("")
       })
-  }, [keyID, cancelKey])
+  }, [keyID, cancelKey, toast])
 
   useEffect(() => {
     getData().then(res => setData(res as unknown as Log[]))

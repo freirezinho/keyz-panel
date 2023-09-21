@@ -2,15 +2,24 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 
-export type Log = string[]
+export type LogResponse = { 
+  result: Log[]
+}
+
+export type Log = {
+  id: string,
+  message: string,
+  created_at: string,
+  updated_at: string
+}
 
 export const columns: ColumnDef<Log>[] = [
   {
-    accessorFn: item => `${new Date(item[2]).toLocaleString()}`,
+    accessorFn: item => `${new Date(item.created_at).toLocaleString()}`,
     header: "Data",
   },
   {
-    accessorFn: item => `${item[1].split(": ")[1]}`,
+    accessorFn: item => `${item.message.split(": ")[1]}`,
     header: "Registro",
   },
 ]

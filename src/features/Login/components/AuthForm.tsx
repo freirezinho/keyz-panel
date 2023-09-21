@@ -19,18 +19,6 @@ export function AuthForm({ className, ...props }: UserAuthFormProps) {
     event.preventDefault()
   }
 
-  // async function loginWithGoogle(event: React.SyntheticEvent) {
-  //   event.preventDefault()
-  //   login()
-  //     .then(() => {
-  //       navigate('/')
-  //     })
-  //     .catch((error) => {
-  //       // noop
-  //       console.error(error)
-  //     })
-  // }
-
   async function loginWithEmailAndPassword(event: React.SyntheticEvent) {
     event.preventDefault()
     console.log(username)
